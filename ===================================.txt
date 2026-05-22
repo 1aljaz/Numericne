@@ -1,0 +1,139 @@
+=================================================================================
+             NAVODILA IN PRIROČNIK ZA MANEVRIRANJE MED DATOTEKAMI (KVIZ NM1)
+=================================================================================
+Ta beležnica je strukturirana po tipih nalog, ki se bodo pojavili na kvizu.
+Za vsako datoteko imaš napisane KLJUČNE BESEDE (ki jih iščeš v besedilu naloge),
+točna navodila, KAJ MORAŠ SPREMENITI, in KAKO ODČITATI PRAVILEN ODGOVOR.
+
+!!! POMEMBNO O INDEKSAH V MATLABU !!!
+Matlab indeksira od 1 naprej, naloge pa pogosto od 0!
+- Če naloga sprašuje po elementu "x_0", je to v Matlabu x(1).
+- Če naloga sprašuje po stolpcu 3 v tabeli deljenih diferenc, je to stolpec 3 v Matlabu.
+- Če Nevilleova shema išče P_(i,j) s startom pri 0, pazi na zamik!
+
+=================================================================================
+SKLOP 1: INTERPOLACIJA IN ZLEPCI (Glavna tema tvojega prihajajočega kviza!)
+=================================================================================
+
+1. datoteka: univerzalne_diference.m (Funkcija)
+---------------------------------------------------------------------------------
+* KDAJ UPORABITI: Ko naloga omenja "Newtonov interpolacijski polinom", "deljene
+  diference", "Hermitovo interpolacijo" ali če so v podatkih PODVOJENE TOČKE.
+* KAKO DELUJE: Vrne celotno matriko (tabelo) deljenih diferenc. Avtomatsko zazna
+  podvojene točke in namesto deljenja vstavi odvode (Hermite).
+* KAKO JO KLICEŠ/UPORABIŠ: V glavni skripti ali ukaznem oknu:
+  >> D = univerzalne_diference(x_tb, f, df)
+
+2. datoteka: zlepek.m (Funkcija / Skripta)
+---------------------------------------------------------------------------------
+* KDAJ UPORABITI: Ko naloga zahteva, da točke razdeliš na dva dela (npr. levi del
+  p1, desni del p2), ki se stakneta v določeni točki x_(k+1), pri čemer se morata
+  v tisti točki ujemati vrednost in prvi odvod (p1'(x) = p2'(x) = f'(x)).
+* KAJ SPREMENITI MED KVIZOM:
+  - Na vrhu prilagodi vhodne točke `x_tb`, funkcijo `f` in odvod `df`.
+  - Spremeni `mid_idx` (indeks stične točke). Če imaš 9 točk in je stik na 5. točki,
+    je `mid_idx = 5`. Če profesor spremeni stično točko, spremeni ta indeks!
+* VPRAŠANJA IZ KVIZA IN ODČITAVANJE:
+  - "Predzadnji element v 3. stolpcu sheme deljenih diferenc za p1":
+    Pogledaš matriko D1. Če ima neničelne elemente npr. v vrsticah 1 do 4,
+    je predzadnji element v vrstici 3: `D1(3, 3)`.
+  - "Razlika |v1 - v2| največjih absolutnih vrednosti matrik D1 in D2":
+    V Matlabu izvedi: `abs(max(abs(D1(:))) - max(abs(D2(:))))`.
+  - "Maksimalna napaka ||f - z||_inf nad množico A":
+    V Matlabu odčitaj izračunano vrednost `napaka_zlepka`.
+
+3. datoteka: neville.m (Funkcija)
+---------------------------------------------------------------------------------
+* KDAJ UPORABITI: Če naloga izrecno zahteva vrednotenje polinoma v ENI SPECIFIČNI TOČKI
+  s pomočjo NEVILLEOVE SHEME ali če sprašuje po vmesnih elementih Nevilleove tabele.
+* KAKO JO KLICEŠ/UPORABIŠ:
+  >> [P_tabela, vrednost] = neville(x_tb, y_tb, t_tocka)
+* KAJ SPREMENITI: Vpiši točke `x_tb`, vrednosti `y_tb` (ki so `f(x_tb)`) in točko `t_tocka`,
+  v kateri računaš vrednost.
+* VPRAŠANJA IZ KVIZA IN ODČITAVANJE:
+  - Vrne matriko `P_tabela`. Če te sprašujejo po vmesnem približku na določenem koraku,
+    ga poiščeš v ustrezni celici matrike `P_tabela`. Končni rezultat je v `P_tabela(1, end)`.
+
+
+=================================================================================
+SKLOP 2: NUMERIČNA LINEARNA ALGEBRA (LASTNE VREDNOSTI)
+=================================================================================
+
+4. datoteka: potencna.m (Funkcija)
+---------------------------------------------------------------------------------
+* KDAJ UPORABITI: Ko naloga zahteva iskanje DOMINANTNE (največje po absolutni vrednosti)
+  lastne vrednosti ali pripadajočega lastnega vektorja matrike A.
+* KAKO DELUJE: Izvaja množenje z_nov = A*z in normira vektor z 2-normo. Zaustavi se, ko
+  je reziduum ||A*z - lambda*z||_2 manjši od tolerance.
+
+5. datoteka: naloga2_glavni.m (Skripta)
+---------------------------------------------------------------------------------
+* KDAJ UPORABITI: To je krovna skripta za delo z lastnimi vrednostmi.
+* KAJ SPREMENITI MED KVIZOM: Matriko `A` na vrhu in začetni približek `z0` (npr. `[1; 0; 0; 0]`).
+* VPRAŠANJA IZ KVIZA IN ODČITAVANJE:
+  - "Približek za lambda_1 po n korakih": Nastavi `max_koraki = n` in zaženi.
+  - "Absolutna razlika med približkom po 1 koraku in po 4 korakih": Skripta to avtomatsko
+    izračuna pod delom (b) preko ukaza `abs(lambda_1 - lambda_4)`.
+  - "Hotellingova redukcija (deflacija)": Uporabi se, ko naloga želi DRUGO NAJVEČJO lastno
+    vrednost (lambda_2). Skripta izračuna `B = A - mu * v * v'`, kjer sta `mu` in `v`
+    prvi lastni par, nato pa na matriki B požene še enkrat potenčno metodo.
+  - "Norma vsote lastnih vektorjev ||v + z||_2": Preprosto odčitaj rezultat pod delom (d).
+
+
+=================================================================================
+SKLOP 3: METODA NAJMANJŠIH KVADRATOV (MNK / APROKSIMACIJA)
+=================================================================================
+
+6. datoteka: mnk_vse_baze.m (Skripta)
+---------------------------------------------------------------------------------
+* KDAJ UPORABITI: Ko imaš podane meritve (npr. leta in prodajo, ali koordinate t in v)
+  and jih želiš aproksimirati s funkcijo oblike f(x) = c0*g0(x) + c1*g1(x) + ...
+* KAJ SPREMENITI MED KVIZOM:
+  - Vpiši vektorja `x` in `y` (ali `t` in `v`).
+  - !!! ZELO POMEMBNO !!! Definiraj prave bazne funkcije `baza1`, `baza2`, `baza3`...
+    Če imaš model c0 + c1*x + c2*x^2, spremeni v:
+    `baza1 = @(x) ones(size(x));`
+    `baza2 = @(x) x;`
+    `baza3 = @(x) x.^2;`
+    Nato sestavi matriko `A = [baza1(x), baza2(x), baza3(x)];`.
+* VPRAŠANJA IZ KVIZA IN ODČITAVANJE:
+  - "Napoved za določeno leto/točko": Ko koda izračuna koeficiente `c_koef`, izračunaš
+    vrednost v novi točki: `y_nov = c_koef(1)*baza1(x_nov) + c_koef(2)*baza2(x_nov) + ...`
+  - "Frobeniusova norma matrike A": Izvedi ukaz `norm(A, 'fro')`.
+
+
+=================================================================================
+SKLOP 4: ITERACIJE, NELINEARNI SISTEMI IN OPTIMIZACIJA
+=================================================================================
+
+7. datoteka: iteracija_sistemi.m (Skripta)
+---------------------------------------------------------------------------------
+* KDAJ UPORABITI: Ko rešuješ linearni sistem Ax = b z iterativno metodo.
+* KAJ SPREMENITI: Na vrhu spremeni matriko `A`, desno stran `b` in začetni vektor `x`.
+* PREKLOP MED METODAMA: Spremeni spremenljivko `metoda = 'Jacobi'` ali `metoda = 'Gauss-Seidel'`.
+* ODČITAVANJE: Beleži vektor približka skozi korake v matriko `vsi_koraki`. Če vprašajo
+  po 1-normi ali 2-normi razlike po k korakih, jo prebereš iz ustreznega stolpca.
+
+8. datoteka: newton_nelinearni.m (Skripta)
+---------------------------------------------------------------------------------
+* KDAJ UPORABITI: Iskanje ničel nelinearnega sistema več enačb F(x) = 0.
+* KAJ SPREMENITI: Funkcijo `F = @(x) [...]` (vektor enačb, kjer mora biti vse na levi strani,
+  torej = 0) in Jacobijevo matriko odvodov `JF = @(x) [...]`. Vpiši začetni približek `x0`.
+
+9. datoteka: gradientni_spust.m (Skripta)
+---------------------------------------------------------------------------------
+* KDAJ UPORABITI: Iskanje minimuma funkcije več spremenljivk.
+* KAJ SPREMENITI: Funkcijo `f = @(x) ...` in njen gradient `grad_f = @(x) [...]` (vektor prvih odvodov).
+  Nastavi dolžino koraka `alfa` (learning rate) in začetno točko.
+
+=================================================================================
+             HITRI REŠEVALNI ALGORITEM (STRATEGIJA MED KVIZOM)
+=================================================================================
+1. Preberi nalogo in poišči ključno besedo (npr. "Zlepek dveh polinomov").
+2. Odpri ustrezno datoteko (v tem primeru `zlepek.m`).
+3. Pojdi na vrh datoteke in takoj prepiši vhodne podatke (točke, funkcijo f, odvod df).
+4. Pazi na parametre (ali je stična točka enaka kot v DN ali je prestavljena).
+5. Zaženi skripto (F5).
+6. Poglej kaj natančno sprašuje podnaloga (a, b, c, d, e) in izpiši vrednost spremenljivke
+   v ukazno okno (npr. napiši `D1` ali `napaka_zlepka`), da dobiš natančno številko.
+=================================================================================
