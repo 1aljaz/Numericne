@@ -1,0 +1,88 @@
+% =========================================================================
+% DEL (a): NEWTONOVA INTERPOLACIJA S SIMBOLNIM PRISTOPOM
+% =========================================================================
+
+% --- 1. PRIPRAVA PODATKOV ---
+% Vektor x_tb vsebuje 9 točk, kjer poznamo vrednosti (interpolacijske točke).
+x_tb = [0 0.1 0.5 0.6 0.8 1 1.2 1.8 2];
+total = length(x_tb); % total postane število 9 (dolžina vektorja)
+
+% Vektor A predstavlja "gosto mrežo" 1000 točk med 0 in 2.
+% Matlab tukaj ustvari vrstično matriko dimenzije 1x1000.
+A = linspace(0, 2, 1000);
+
+% Izračunamo vrednosti funkcije sin(7x) v naših 9 interpolacijskih točkah.
+% y postane vektor z 9 številkami.
+y = sin(7 * x_tb);
+
+
+% --- 2. SCHEMA DELJENIH DIFERENC ---
+% Ustvarimo matriko 9x9, polno ničel, ki bo služila kot tabela.
+D = zeros(total, total);
+
+% V prvi stolpec matrike D zapišemo transponirane vrednosti y.
+% y' spremeni vrstico v stolpec (9x1), da se ujema s prvim stolpcem matrike D.
+D(:, 1) = y';
+
+% Zanki izračunata višje rede deljenih diferenc (klasična Newtonova tabela).
+for j = 2:total
+    for i = 1:total - j + 1
+        % Izračunamo razmerje med razlikami vrednosti in razlikami x-ov.
+        D(i, j) = (D(i + 1, j - 1) - D(i, j - 1)) / (x_tb(i + j - 1) - x_tb(i));
+    end
+end
+
+% Koeficienti našega polinoma so v prvi vrstici matrike D.
+c = D(1, :);
+
+
+% --- 3. SESTAVLJANJE SIMBOLNEGA POLINOMA (Tvoj pristop) ---
+% Definiramo, da je 'x' simbolna spremenljivka (ne številka, ampak črka).
+syms x
+
+p = c(1);   % Začnemo s prvim koeficientom c_0
+term = 1;   % Pomožna spremenljivka za gradnjo oklepajev (x-x_0)(x-x_1)...
+
+% Zanka teče od 2 do 9 in gradi Newtonovo formulo.
+for i = 2:length(c)
+    % V vsakem koraku pomnožimo prejšnji izraz z novim oklepajem (x - x_i-1)
+    term = term * (x - x_tb(i - 1));
+    
+    % Prištejemo koeficient, pomnožen s trenutnim produktom oklepajev
+    p = p + c(i) * term;
+end
+
+% Ukaz expand vzame polinom 'p' in ga razvije (pomnoži oklepaje) v standardno obliko.
+p_razvit = expand(p); 
+
+
+% --- 4. EVALVACIJA IN IZRAČUN NAPAKE ---
+% f_A postane vektor (1x1000), ki vsebuje točne vrednosti sin(7x) za vsako točko iz A.
+f_A = sin(7 * A);
+
+% Ukaz 'subs' v simbolni polinom 'p' namesto črke 'x' vstavil celoten vektor A (1000 točk).
+% Ukaz 'double' spremeni simbolni rezultat nazaj v navadne številke (vektor 1x1000).
+p_A = double(subs(p, x, A));
+
+% Izračunamo absolutno razliko med pravo funkcijo in polinomom v vseh 1000 točkah.
+% 'abs' poskrbi, da so vse razlike pozitivne, 'max' pa poišče največjo med njimi.
+napaka_a = max(abs(f_A - p_A));
+
+% Izpis končnega rezultata v ukazno okno.
+disp(['Maksimalna napaka ||f - p|| nad množico A je: ' num2str(napaka_a)]);
+
+% =========================================================================
+% NADALJEVANJE: KODA ZA NALOGO (b) in (e)
+% =========================================================================
+
+% 1. Definiramo originalno funkcijo in njen odvod preko @(x) sintakse
+f = @(x) sin(7 * x);
+df = @(x) 7 * cos(7 * x);
+
+% 2. Pokličemo našo novo funkcijo 'zlepek', ki jo bo Matlab poiskal v 'zlepek.m'
+% Vrne nam vektor vrednosti zlepka na 1000 točkah množice A
+z_A = zlepek(x_tb, f, df, A);
+
+% 3. NALOGA (e): Izračun napake ||f - z|| nad množico A
+napaka_e = max(abs(f_A - z_A));
+disp(['Maksimalna napaka ||f - z|| nad množico A je: ' num2str(napaka_e)]);
